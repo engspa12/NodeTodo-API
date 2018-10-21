@@ -27,6 +27,7 @@ app.post('/todos',(req, res) => {
 });
 
 app.get('/todos', (req, res) => {
+  //find() can receive empty arguments
   Todo.find().then((todos) => {
     res.send({todos});
   },(e) => {
@@ -50,6 +51,25 @@ app.get('/todos/:id', (req, res) => {
     res.send({todo: todo});
     },(e) => {
     res.status(400).send();
+  });
+});
+
+app.delete('/todos/:id', (req, res) => {
+  var id = req.params.id;
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send({error: 'id not valid'});
+  }
+
+  Todo.findOneAndDelete({_id: id}).then((todo) => {
+    if(!todo){
+      return res.status(404).send({error: 'todo not found'});
+    }
+
+    res.send({todo});
+
+    },(e) => {
+      res.status(400).send({error: 'error in method findOneAndDelete'});
   });
 });
 
