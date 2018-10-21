@@ -1,7 +1,7 @@
+const _ = require('lodash');
 const {ObjectID} = require('mongodb');
-
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
@@ -70,6 +70,35 @@ app.delete('/todos/:id', (req, res) => {
 
     },(e) => {
       res.status(400).send({error: 'error in method findOneAndDelete'});
+  });
+});
+
+app.patch('/todos/:id',(req, res) => {
+  var id = req.params.id;
+  //1)
+  var body = _.pick(req.body, ['text','completed']);
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send({error: 'id not valid'});
+  }
+
+  //2)
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  //3)
+  Todo.findOneAndUpdate({_id: id}, {$set: body},{new: true}).then((todo) => {
+    if(!todo){
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
   });
 });
 
