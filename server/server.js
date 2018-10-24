@@ -21,8 +21,8 @@ app.post('/todos',(req, res) => {
     text: req.body.text
   });
 
-  todo.save().then((doc) => {
-    res.send(doc);
+  todo.save().then((todoDoc) => {
+    res.send(todoDoc);
   }, (e) => {
     res.status(400).send(e);
   });
@@ -102,6 +102,34 @@ app.patch('/todos/:id',(req, res) => {
     res.send({todo});
   }).catch((e) => {
     res.status(400).send();
+  });
+});
+
+app.post('/users',(req, res) => {
+
+  var body = _.pick(req.body, ['email','password']);
+  var user = new User(body);
+
+  // User.findByToken
+  // user.generateAuthToken
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+    //res.send(user);
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch ((e) => {
+    res.status(400).send(e);
+  });
+
+});
+
+app.get('/users', (req, res) => {
+  //find() can receive empty arguments
+  User.find().then((users) => {
+    res.send({users});
+  },(e) => {
+    res.status(400).send(e);
   });
 });
 

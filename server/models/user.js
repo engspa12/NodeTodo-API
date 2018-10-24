@@ -1,14 +1,108 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
-//Creating a model
-var User = mongoose.model('User',{
+// {
+//   email: 'andrew@example.com',
+//   password: 'dkbjrjgra4431jehrllrre123'
+//   tokens: [{
+//     access: 'auth',
+//     token: 'gjrnrjfnwjkfee1uen1nkada34'
+//   }]
+// }
+
+var UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
     trim: true,
-    minlength: 1
-  }
+    minlength: 1,
+    unique: true,
+    validate: {
+      validator: (value) => {
+        return validator.isEmail(value);
+      },
+      message: '{VALUE} is not a valid email'
+    }
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  tokens: [{
+    access: {
+      type: String,
+      required: true
+    },
+    token: {
+      type: String,
+      required: true
+    }
+  }]
 });
+
+UserSchema.methods.toJSON = function () {
+  var user = this;
+  var userObject = user.toObject();
+
+  return _.pick(userObject, ['_id','email']);
+};
+
+UserSchema.methods.generateAuthToken = function () {
+  //the this keyword stores the individual document
+  var user = this;
+  var access = 'auth';
+  var token = jwt.sign({_id: user._id.toHexString(), access: access},'abc123').toString();
+
+  // users.tokens.push({
+  //   access, token
+  // });
+
+  //Inconsistencies in mongodb versions
+  user.tokens = user.tokens.concat([{access, token}]);
+
+  return user.save().then(() => {
+    return token;
+  });
+
+};
+
+//Creating the model
+var User = mongoose.model('User', UserSchema);
+
+//Creating a model
+// var User = mongoose.model('User',{
+//   email: {
+//     type: String,
+//     required: true,
+//     trim: true,
+//     minlength: 1,
+//     unique: true,
+//     validate: {
+//       validator: (value) => {
+//         return validator.isEmail(value);
+//       },
+//       message: '{VALUE} is not a valid email'
+//     }
+//   },
+//   password: {
+//     type: String,
+//     required: true,
+//     minlength: 6
+//   },
+//   tokens: [{
+//     access: {
+//       type: String,
+//       required: true
+//     },
+//     token: {
+//       type: String,
+//       required: true
+//     }
+//   }]
+// });
 
 module.exports = {
   User
