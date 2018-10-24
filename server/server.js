@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
 var {User} = require('./models/user.js');
+var {authenticate} = require('./middleware/authenticate.js');
 
 var app = express();
 //const port = process.env.PORT || 3000;
@@ -105,6 +106,8 @@ app.patch('/todos/:id',(req, res) => {
   });
 });
 
+// POST /users
+// Signup route
 app.post('/users',(req, res) => {
 
   var body = _.pick(req.body, ['email','password']);
@@ -117,6 +120,7 @@ app.post('/users',(req, res) => {
     return user.generateAuthToken();
     //res.send(user);
   }).then((token) => {
+    //res.header() lets us set a header so it takes the key value
     res.header('x-auth', token).send(user);
   }).catch ((e) => {
     res.status(400).send(e);
@@ -124,13 +128,17 @@ app.post('/users',(req, res) => {
 
 });
 
-app.get('/users', (req, res) => {
-  //find() can receive empty arguments
-  User.find().then((users) => {
-    res.send({users});
-  },(e) => {
-    res.status(400).send(e);
-  });
+// app.get('/users', (req, res) => {
+//   //find() can receive empty arguments
+//   User.find().then((users) => {
+//     res.send({users});
+//   },(e) => {
+//     res.status(400).send(e);
+//   });
+// });
+
+app.get('/users/me',authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 app.listen(port, () => {
