@@ -94,6 +94,31 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+
+  return User.findOne({email}).then((user) => {
+    //with Promise.reject() the catch statement is going to get called in server.js
+    //which is using findByCredentials
+    if(!user){
+      return Promise.reject();
+    }
+
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, response) => {
+        if(!err){
+          if(response){
+            resolve(user);
+          } else{
+            reject();
+          }
+        }
+        //res.send({error: 'error in bcrypt'});
+      })
+    });
+  });
+};
+
 //Method that runs before saving (the event 'save') to the database
 UserSchema.pre('save', function (next) {
   var user = this;
