@@ -44,6 +44,8 @@ var UserSchema = new mongoose.Schema({
   }]
 });
 
+
+//Override method
 UserSchema.methods.toJSON = function () {
   var user = this;
   var userObject = user.toObject();
@@ -51,6 +53,7 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ['_id','email']);
 };
 
+//Instance method
 UserSchema.methods.generateAuthToken = function () {
   //the this keyword stores the individual document
   var user = this;
@@ -69,6 +72,8 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+
+//Model method
 UserSchema.statics.findByToken = function (token) {
   var User = this;
   var decoded;
@@ -89,6 +94,7 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+//Method that runs before saving (the event 'save') to the database
 UserSchema.pre('save', function (next) {
   var user = this;
 
