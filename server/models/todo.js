@@ -15,6 +15,11 @@ var Todo = mongoose.model('Todo', {
   completedAt: {
     type: Number,
     default: null
+  },
+  //This property tells us which user created the todo
+  _creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 });
 

@@ -13,6 +13,9 @@ const bcrypt = require('bcryptjs');
 //   }]
 // }
 
+
+//The tokens array can have more than one item, each item is created when
+//user.generateAuthToken() is called
 var UserSchema = new mongoose.Schema({
   email: {
     type: String,
