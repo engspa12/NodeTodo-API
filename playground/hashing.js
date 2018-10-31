@@ -32,7 +32,6 @@ bcrypt.compare('123E', hashedPassword, (err, res) => {
 // console.log('decoded', decoded);
 
 // var message = 'I am user number 3';
-//
 // var hash = SHA256(message).toString();
 //
 // console.log(`Message: ${message}`);
